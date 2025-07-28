@@ -97,7 +97,7 @@ exports.updateServiceFees = async (req, res, next) => {
 exports.deleteServiceFees = async (req, res, next) => {
     try {
         const { admin_id, role } = req;
-        const {subId,serviceId,user_id } = req.body;
+        const {subId,serviceId } = req.body;
         if (!admin_id || !role ) {
             return res.status(400).json({
                 success: false, message: "Invalid Service Credentials"

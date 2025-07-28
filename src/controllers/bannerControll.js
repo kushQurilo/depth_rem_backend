@@ -99,3 +99,67 @@ exports.getBannerWithTitle = async (req, res, next) => {
             })
     }
 }
+
+exports.deleteBanner = async (req, res, next) => {
+    try {
+        const bannerId = req.params.id;
+        const isBanner = await bannerModel.findById(bannerId);
+        if (!isBanner) {
+            return res.status(404)
+                .json({ success: false, message: "Banner not found" });
+        }
+        await isBanner.deleteOne();
+        return res.status(200)
+            .json({ success: true, message: "Banner deleted successfully" });
+    }
+    catch (error) {
+        return res.status(500)
+            .json({
+                success: false,
+                message: error.message
+            })
+    }
+}
+
+
+exports.deleteBannerWithTitle = async (req, res, next) => {
+    try {
+        const bannerId = req.params.id;
+        const isBanner = await bannerWithTitle.findById(bannerId);
+        if (!isBanner) {
+            return res.status(404)
+                .json({ success: false, message: "Banner not found" });
+        }
+        await isBanner.deleteOne();
+        return res.status(200)
+            .json({ success: true, message: "Banner deleted successfully" });
+    }
+    catch (error) {
+        return res.status(500)
+            .json({
+                success: false,
+                message: error.message
+            })
+    }
+
+}
+
+exports.updateTitledBanner = async (req, res, next) => {
+    try {
+        const bannerId = req.params.id;
+        const banner = req.body;
+        const isBanner = await bannerWithTitle.findById(bannerId);
+        if (!isBanner) {
+            return res.status(404)
+                .json({ success: false, message: "Banner not found" });
+        }
+        isBanner.bannerTitle = banner.title;
+    }
+    catch (error) {
+        return res.status(500)
+            .json({
+                success: false,
+                message: error.message
+            })
+    }
+}

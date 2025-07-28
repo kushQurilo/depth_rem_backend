@@ -181,9 +181,9 @@ exports.deleteSubscription = async (req, res, next) => {
     try {
         const { role, admin_id } = req;
         const { id } = req.query;
-        const {subscriptionId} =req.body
+        const {subscriptionId} =req.body;
         if (!role || !admin_id) {
-            return res.status(400).json({ message: "Invalid admin credentials" });
+            return res.status(400).json({ message: "Invalid admin credentials"});
         }
         const isUser = await User.findById(id);
         if (!isUser || isUser.length === 0) {
