@@ -36,38 +36,60 @@ exports.createAdmin = async (req, res) => {
 exports.loginAdmin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
-            return res.status(400)
-                .json({ success: false, message: "Invalid Credentials" });
+            return res.status(400).json({ success: false, message: "Invalid Credentials" });
         }
+
         const isExist = await adminModel.findOne({ email });
-        if (isExist) {
-            const isMatch = await compareHashPassword(password, isExist.password);
-            if (isMatch) {
-                const payload = {
-                    name: isExist.name,
-                    email: isExist.email,
-                    adminId: isExist._id,
-                    role: isExist.role
-                }
-                const secretKey = process.env.SecretKey
-                const adminToken = await jwt.sign(payload, secretKey, { expiresIn: "15d" });
-                return res.status(200)
-                    .json({ success: true, message: "logged in successfully", token: adminToken });
-            } else {
-                return res.status(404)
-                    .json({ success: false, message: "Invalid password" })
-            }
+
+        if (!isExist) {
+            return res.status(404).json({ success: false, message: "Admin not found" });
         }
-        return res.status(404)
-            .json({ success: false, message: "Admin not found" });
+
+        //  Check if account is locked
+        if (isExist.lockUntil && isExist.lockUntil > Date.now()) {
+            const unlockTime = new Date(isExist.lockUntil).toLocaleTimeString();
+            return res.status(403).json({ success: false, message: `Account locked until ${unlockTime}` });
+        }
+        const isMatch = await compareHashPassword(password, isExist.password);
+
+        if (!isMatch) {
+            isExist.failedAttempts = (isExist.failedAttempts || 0) + 1;
+            // Lock the account if failed 3 times
+            if (isExist.failedAttempts >= 3) {
+                isExist.lockUntil = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+                await isExist.save();
+                return res.status(403).json({ success: false, message: "Account locked due to 3 failed attempts. Try again in 10 minutes." });
+            }
+
+            await isExist.save();
+            return res.status(401).json({ success: false, message: "Invalid password" });
+        }
+        //If correct password, reset attempts
+        isExist.failedAttempts = 0;
+        isExist.lockUntil = null;
+        await isExist.save();
+
+        const payload = {
+            name: isExist.name,
+            email: isExist.email,
+            adminId: isExist._id,
+            role: isExist.role
+        }
+        const secretKey = process.env.SecretKey;
+        const adminToken = jwt.sign(payload, secretKey, { expiresIn: "15d" });
+        return res.status(200).json({
+            success: true,
+            message: "Logged in successfully",
+            token: adminToken
+        });
+
     } catch (err) {
-        return res.status(500)
-            .json({
-                success: false, message: err.message
-            })
+        return res.status(500).json({ success: false, message: err.message });
     }
 }
+
 
 exports.addBarcodeWithUpi = async (req, res, next) => {
     try {
