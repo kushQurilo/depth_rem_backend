@@ -44,6 +44,15 @@ const adminSchema = mongoose.Schema({
     upi:{
         type:String
     }
+    ,
+    failedAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockUntil: {
+        type: Date,
+        default: null
+    }
 });
 
 const adminModel = new mongoose.model('admin', adminSchema);

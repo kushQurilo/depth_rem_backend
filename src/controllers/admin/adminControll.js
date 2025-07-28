@@ -36,24 +36,19 @@ exports.createAdmin = async (req, res) => {
 exports.loginAdmin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-
         if (!email || !password) {
             return res.status(400).json({ success: false, message: "Invalid Credentials" });
         }
-
         const isExist = await adminModel.findOne({ email });
-
         if (!isExist) {
             return res.status(404).json({ success: false, message: "Admin not found" });
         }
-
         //  Check if account is locked
         if (isExist.lockUntil && isExist.lockUntil > Date.now()) {
             const unlockTime = new Date(isExist.lockUntil).toLocaleTimeString();
             return res.status(403).json({ success: false, message: `Account locked until ${unlockTime}` });
         }
         const isMatch = await compareHashPassword(password, isExist.password);
-
         if (!isMatch) {
             isExist.failedAttempts = (isExist.failedAttempts || 0) + 1;
             // Lock the account if failed 3 times
@@ -62,7 +57,6 @@ exports.loginAdmin = async (req, res, next) => {
                 await isExist.save();
                 return res.status(403).json({ success: false, message: "Account locked due to 3 failed attempts. Try again in 10 minutes." });
             }
-
             await isExist.save();
             return res.status(401).json({ success: false, message: "Invalid password" });
         }
