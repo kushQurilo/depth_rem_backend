@@ -7,6 +7,8 @@ const loanRouter = require('./src/routes/loansRoute');
 const adminRouter = require('./src/routes/adminRoute');
 const subscriptionRouter = require('./src/routes/subscriptionRoute');
 const serviceRouter = require('./src/routes/serviceRoute');
+const advocateRouter = require('./src/routes/advocateRouter');
+const DRIRoutes = require('./src/routes/DriRoutes');
 const app = express();
 const baseURI = '/api/v1/'
 app.use(express.urlencoded({extended:true}));
@@ -19,5 +21,7 @@ app.use(`${baseURI}banner`, bannerRouter);
 app.use(`${baseURI}loan`,loanRouter);
 app.use(`${baseURI}subcription`,subscriptionRouter);
 app.use(`${baseURI}service`,serviceRouter);
+app.use(`${baseURI}advocate`,advocateRouter);
+app.use(`${baseURI}driworks`,DRIRoutes);
 
 module.exports = app;
