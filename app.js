@@ -9,6 +9,7 @@ const subscriptionRouter = require('./src/routes/subscriptionRoute');
 const serviceRouter = require('./src/routes/serviceRoute');
 const advocateRouter = require('./src/routes/advocateRouter');
 const DRIRoutes = require('./src/routes/DriRoutes');
+const KycRouters = require('./src/routes/KycRouter');
 const app = express();
 const baseURI = '/api/v1/'
 app.use(express.urlencoded({extended:true}));
@@ -23,5 +24,6 @@ app.use(`${baseURI}subcription`,subscriptionRouter);
 app.use(`${baseURI}service`,serviceRouter);
 app.use(`${baseURI}advocate`,advocateRouter);
 app.use(`${baseURI}driworks`,DRIRoutes);
+app.use(`${baseURI}kyc`,KycRouters)
 
 module.exports = app;

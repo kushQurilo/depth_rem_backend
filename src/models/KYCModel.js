@@ -8,17 +8,17 @@ const kycSchema = mongoose.Schema({
         type:String,
         required:[true, 'name required']
     },
-    Aadhar:{
+    aadhar:{
         type:String,
         require:[true, 'Aadhar required']
     },
-    Pan:{
+    pan:{
         type:String,
         required:[true,'Pan Card required']
     },
     status:{
         type:String,
-        default:"Pending"
+        default:"pending"
     }
 });
 const KYCmodel = mongoose.model('kyc',kycSchema);
