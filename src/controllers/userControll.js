@@ -2,7 +2,6 @@ const { default: mongoose } = require("mongoose");
 const User = require("../models/userModel");
 const otpGenerator = require('otp-generator');
 const jwt = require("jsonwebtoken");
-const sentMail = require("../utilitis/mail");
 
 const otpStore = {}
 exports.sendOTP = async (req, res) => {
@@ -44,25 +43,34 @@ exports.verifyOTP = async (req, res) => {
     if (!phone || !otp) {
       return res.status(400).json({ success: false, message: "Phone and OTP are required" });
     }
-
     const record = otpStore[phone];
-
     if (!record || record.expiresAt < Date.now()) {
       return res.status(400).json({ success: false, message: "OTP expired or not found" });
     }
-
     const submittedOtp = String(otp).trim();
-
     if (record.otp !== submittedOtp) {
       console.log("Stored OTP:", record.otp, "Received OTP:", submittedOtp);
       return res.status(401).json({ success: false, message: "Invalid OTP" });
     }
 
-    const user = await User.findOne({ phone });
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found after OTP validation" });
+    const isUser = await User.findOne({phone:phone})
+    if(isUser){
+      const token = jwt.sign(
+      { userId: isUser._id, role: "user" },
+      process.env.SecretKey,
+      { expiresIn: "7d" }
+    );
+    delete otpStore[phone];
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token
+    });
     }
-
+    const user = await User.create({ phone });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "failed to verification." });
+    }
     const token = jwt.sign(
       { userId: user._id, role: "user" },
       process.env.SecretKey,

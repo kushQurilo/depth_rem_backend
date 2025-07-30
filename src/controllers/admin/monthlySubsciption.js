@@ -133,7 +133,7 @@ exports.getUsersSubscriptionToUser = async (req, res, next) => {
 //update subscription by admin...
 exports.updateSubscription = async (req, res, next) => {
     try {
-        const { role, admin_id } = req;
+        const {  admin_id } = req;
         const { id } = req.query;
         const { subscription, gst, duedate ,subscriptionId} = req.body;
         const fees = 1000;
@@ -149,9 +149,7 @@ exports.updateSubscription = async (req, res, next) => {
         if (!role || !admin_id) {
             return res.status(400).json({ message: "Invalid admin credentials" });
         }
-        if (role !=='admin'){
-            return res.status(400).json({ message: "Only admin Access" });
-        }
+        
         const isUser = await User.findById(id);
         if (!isUser || isUser.length === 0) {
             return res.status(400).json({ message: "User not found" });
