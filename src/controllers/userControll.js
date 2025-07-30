@@ -13,35 +13,26 @@ exports.sendOTP = async (req, res) => {
       return res.status(400).json({ success: false, message: "Phone number is required" });
     }
 
-    let user = await User.findOne({ phone });
+    const otp = otpGenerator.generate(4, {
+      digits: true,
+      upperCaseAlphabets: false,
+      specialChars: false,
+      alphabets: false,
+    });
 
-    if (!user) {
-      return res.status(404)
-        .json({
-          success: false,
-          message: "Number Not Register Create Your Account"
-        })
-    }
-    // Generate a 4-digit OTP
-    const generatedOtp = otpGenerator.generate(4, { digits: true, upperCaseAlphabets: false, specialChars: false, alphabets: false });
-
-    // Save OTP temporarily (ideally use Redis with TTL)
+   
     otpStore[phone] = {
-      otp: generatedOtp,
-      expiresAt: Date.now() + 5 * 60 * 1000 // 5 mins expiry
+      otp,
+      expiresAt: Date.now() + 5 * 60 * 1000, // valid for 5 minutes
     };
-      const mail = await sentMail(user?.email,"One Time Password",'welcome to qurilo.com',`<html>
-        <body>
-      <p>you otp is <b>  <span style="font-size: 20px; color: #black;">${generatedOtp}</span> </b> do not share otp to other. this otp will expire within 5 minutes</p>
-        </html>`)
-      if(!mail){
-        return res.status(400)
-        .json({success:false,message:"unable to send otp please try again."})
-      }
-      return res.status(200).json({ success: true, message: "OTP sent successfully"});
 
+    return res.status(200).json({
+      success: true,
+      message: "OTP generated successfully",
+      otp,
+    });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 };
 
@@ -145,7 +136,6 @@ exports.createUser = async (req, res, next) => {
       })
   }
 }
-
 exports.updateUser = async (req, res, next) => {
   try {
     const updateFields = {};

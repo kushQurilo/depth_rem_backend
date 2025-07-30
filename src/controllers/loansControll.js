@@ -8,9 +8,7 @@ exports.createPersonalLoan = async (req, res) => {
         if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ success: false, message: "Invalid userId" });
         }
-        if(loanType !="personal" || "credit"){
-            return res.status(400).json({ success: false, message: "Invalid loan type"});
-        } 
+        
         const loan = await personalLoanModel.create({
             userId,
             bankName,
