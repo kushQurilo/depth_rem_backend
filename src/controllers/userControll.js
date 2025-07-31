@@ -2,7 +2,7 @@ const { default: mongoose } = require("mongoose");
 const User = require("../models/userModel");
 const otpGenerator = require('otp-generator');
 const jwt = require("jsonwebtoken");
-
+const DriUser = require('../models/DriUserModel');
 const otpStore = {}
 exports.sendOTP = async (req, res) => {
   try {
@@ -146,7 +146,7 @@ exports.createUser = async (req, res, next) => {
 }
 exports.updateUser = async (req, res, next) => {
   try {
-    const updateFields = {};
+    
     const { name, email, phone } = req.body;
     const { id } = req.query;
     if (name !== undefined) updateFields.name = name;
@@ -156,7 +156,9 @@ exports.updateUser = async (req, res, next) => {
       return res.status(400)
         .json({ success: false, message: "invalid user" })
     }
-
+    const updateFields = {
+      name,email,phone
+    };
     const user = await User.updateOne(
       { _id: id },
       updateFields,
@@ -172,3 +174,15 @@ exports.updateUser = async (req, res, next) => {
   }
 }
 // user login ny phone and otp
+
+
+
+//
+exports.InsertUser = async (req , res , next) => {
+  try{
+    // const {name, email,gender,}
+  }catch(err){
+    return res.status(500)
+    .json({ success: false, message: err.message });
+  }
+}

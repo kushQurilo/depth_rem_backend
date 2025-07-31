@@ -15,7 +15,7 @@ exports.createBanner = async (req, res, next) => {
             folder: 'Banners',
         });
           fs.unlinkSync(imagePath);
-        const upload = await bannerModel.create({ bannerImage: banner.secure_url });
+        const upload = await bannerModel.create({ bannerImage: banner.secure_url,public_id:banner.public_id });
         if (!upload) {
             return res.status(404)
                 .json({ success: false, message: "failed to upload" });
@@ -180,5 +180,32 @@ exports.updateTitledBanner = async (req, res, next) => {
                 success: false,
                 message: error.message
             })
+    }
+}
+
+//delete banner
+exports.deleteBanner = async (req, res, next) => {
+    try{
+        const {public_id} = req.query
+        const result = await cloudinary.uploader.destroy(public_id);
+        if(result.result !=='ok'){
+            return res.status(400)
+            .json({
+                success:false,
+                message:"failed to delete image"
+            })
+        }
+        await bannerModel.deleteOne({public_id})
+        res.status(201)
+        .json({
+            success:true,
+            message:"image deleted successfully"
+        })
+    }catch(error){
+        return res.status(500)
+        .json({
+            success:false,
+            message:error.message
+        })
     }
 }
