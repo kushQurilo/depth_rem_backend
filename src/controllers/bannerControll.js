@@ -1,16 +1,21 @@
 const bannerModel = require("../models/bannerModel");
 const bannerWithTitle = require("../models/bannerWithTitleModel");
-
+const cloudinary = require('../utilitis/cloudinary');
+const fs = require('fs');
 // banner without title
 exports.createBanner = async (req, res, next) => {
     try {
-        const { imagePath } = req;
-        const bannerImage = imagePath;
-        if (!imagePath) {
+        const file = req.file;
+        if (!file) {
             return res.status(404)
                 .json({ message: "Image is required", success: false });
         }
-        const upload = await bannerModel.create({ bannerImage });
+        const imagePath = file.path;
+        const banner = await cloudinary.uploader.upload(imagePath, {
+            folder: 'Banners',
+        });
+          fs.unlinkSync(imagePath);
+        const upload = await bannerModel.create({ bannerImage: banner.secure_url });
         if (!upload) {
             return res.status(404)
                 .json({ success: false, message: "failed to upload" });
@@ -53,29 +58,43 @@ exports.getBanner = async (req, res, next) => {
 
 exports.bannerWithTitle = async (req, res, next) => {
     try {
-        const { imagePath } = req;
-        const { title } = req.body;
-        const bannerImage = imagePath
-        if (!imagePath || !title) {
-            return res.status(404)
-                .json({ success: false, message: "Image and title are required" });
-        };
-        const banner = await bannerWithTitle.create({ bannerImage, bannerTitle: title });
-        if (!banner) {
-            return res.status(404)
-                .json({ success: false, message: "failed to upload" });
+        const file = req.file;
+        if (!file) {
+            return res.status(400).json({ success: false, message: "Image is required" });
         }
-        return res.status(201)
-            .json({ success: true, message: "banner uploaded successfully" });
+
+        const bannerImage = file.path;
+
+        const banner = await cloudinary.uploader.upload(bannerImage, {
+            folder: 'Banners'
+        });
+
+        fs.unlinkSync(bannerImage); // delete local file
+
+        const { title } = req.body;
+        if (!title) {
+            return res.status(400).json({ success: false, message: "Title is required" });
+        }
+
+        const bannerRes = await bannerWithTitle.create({
+            bannerImage: banner.secure_url,
+            bannerTitle: title
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Banner uploaded successfully",
+            data: bannerRes
+        });
 
     } catch (err) {
-        return res.status(500)
-            .json({
-                success: false,
-                message: err.message
-            })
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        });
     }
-}
+};
+
 
 // banner without title end...
 
