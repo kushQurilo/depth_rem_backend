@@ -1,28 +1,26 @@
 const mongoose = require('mongoose');
-const Counter  = require('./')
+const Counter  = require('./counter')
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
-    unique: true,
   },
   name: {
     type: String,
     required: true,
   },
   email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
+    tyep:String
   },
   gender: {
     type: String,
-    enum: ['Male', 'Female', 'Other'],
     default: 'Other',
   },
+  phone:{
+    type:String
+  },
   dateOfJoin: {
-    type: Date.now(),
+    type: Date,
+    default:Date.now
   },
   createdAt: {
     type: Date,
@@ -48,4 +46,5 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-module.exports = mongoose.model('User', userSchema);
+const DrisModel = mongoose.model('DriUser', userSchema);
+module.exports = DrisModel;

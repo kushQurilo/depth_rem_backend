@@ -1,51 +1,54 @@
 const stripe = require("../config/stripe/stripe");
 const EmiModel = require("../models/EMIModel");
-
+const fs = require('fs');
+const excelModel = require("../models/excelModel");
 exports.EMISettlement = async (req, res) => {
-    try {
-        const { principle, intrestRate, rateType, numberOfEMI, duedate, loantype,loanId,user_id } = req.body;
-         
-        if( !principle || !intrestRate || !rateType || !numberOfEMI || !duedate || !loantype || !loanId || !user_id ){
-            return res.status(400).json({ message: "Please fill all the fields" });
-        }
-       
-        const P = parseFloat(principle);
-        const r = rateType === 'yearly'
-            ? parseFloat(intrestRate) / (12 * 100)
-            : parseFloat(intrestRate) / 100;
+  try {
+  //   const fileBuffer = fs.readFileSync(req.file.path);
+  //   const pdfData = new Uint8Array(fileBuffer);
 
-        const n = parseInt(numberOfEMI);
+  //   const doc = await pdfjsLib.getDocument({ data: pdfData }).promise;
 
-        const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  //   let allText = '';
 
-        const paylod = {
-            principle: P,
-            NumberOFEmi: n,
-            EmiAmount: parseFloat(Math.round(emi.toFixed(2))),
-            duedate,
-            loantype,
-            userId:user_id,
-            loanId
-        };
-        const isEMIexist = await EmiModel.findOne({ userId: user_id, loanId:loanId });
-        if(isEMIexist){
-            if(isEMIexist.paidEmis != isEMIexist.numberOfEmI){
-                return res.status(400).json({success:false, message: "EMI alredy exist but have'nt paid all the emi" });
-            }
-            return res.status(400).json({success:false, message: "EMI already exist for this loan" });
-        }
-        const insert = await EmiModel.create(paylod);
-        if (insert) {
-            return res.status(200).json({success:true, message: "EMI Settlement Successfull" });
-        }
-        else {
-            return res.status(400).json({ message: "EMI Settlement Failed" , success:false});
-        }
+  //   for (let i = 1; i <= doc.numPages; i++) {
+  //     const page = await doc.getPage(i);
+  //     const content = await page.getTextContent();
+  //     const pageText = content.items.map(item => item.str).join(' ');
+  //     allText += pageText + '\n';
+  //   }
 
-    } catch (err) {
-        return res.status(500).json({ message: "Server error", error: err.message });
-    }
-};
+  //   // Convert text to object
+  //   const lines = allText.split('\n');
+  //   const extractedObject = {};
+
+  //   lines.forEach(line => {
+  //     const match = line.match(/^([\w\s]+)[\s:]+(.+)$/);
+  //     if (match) {
+  //       const key = match[1].trim();
+  //       const value = match[2].trim();
+  //       extractedObject[key] = value;
+  //     }
+  //   });
+
+  //   if (Object.keys(extractedObject).length === 0) {
+  //     return res.status(400).json({ message: 'No data extracted from PDF' });
+  //   }
+
+  //   // ✅ Save to MongoDB
+  //   const savedData = await excelModel.create(extractedObject);
+
+  //   res.status(200).json({
+  //     message: 'PDF data extracted and saved successfully',
+  //     data: savedData
+  //   });
+
+  } catch (err) {
+    console.error('Error reading PDF:', err);
+    res.status(500).send('Failed to extract or store PDF data');
+  }
+}
+
 
 
 exports.EMIPayment = async (req , res, next) => {

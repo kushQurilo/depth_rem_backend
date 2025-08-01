@@ -22,7 +22,7 @@ exports.sendOTP = async (req, res) => {
    
     otpStore[phone] = {
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000, // valid for 5 minutes
+      expiresAt: Date.now() + 5 * 60 * 1000,
     };
 
     return res.status(200).json({
@@ -88,14 +88,12 @@ exports.verifyOTP = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
-
-
 exports.userController = async (req, res, next) => {
   try {
     const { phone } = req.body;
     if (!phone) {
       return res.status(404)
-        .json({ success: false, message: "invalid mobile number" });
+        .json({ success: false, message: "Invalid mobile number" });
     }
     const userData = await User.findOne({ phone: phone });
     console.log(userData)
