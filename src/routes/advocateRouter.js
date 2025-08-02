@@ -1,9 +1,13 @@
-const { addAdvocate, updateTiming, deleteTiming } = require("../controllers/admin/advocateController");
+const { addAdvocate, updateAdvocate, getSingleAdvocate, getAllAdvocates } = require("../controllers/admin/advocateController");
 const { AuthMiddleWare } = require("../middlewares/adminMiddleware");
 const { roleAuthenticaton } = require("../middlewares/roleBaseAuthentication");
+const UploadSingleImage = require("../middlewares/singleImageUpload");
 
 const advocateRouter = require("express").Router();
-advocateRouter.post('/add-timing',AuthMiddleWare,roleAuthenticaton('admin') , addAdvocate);
-advocateRouter.put('/update-timing',AuthMiddleWare,roleAuthenticaton('admin') , updateTiming);
-advocateRouter.delete('/delete-timing',AuthMiddleWare,roleAuthenticaton('admin') , deleteTiming);
+advocateRouter.post('/add',AuthMiddleWare,roleAuthenticaton('admin'),UploadSingleImage.single('image') , addAdvocate);
+advocateRouter.put('/update',AuthMiddleWare,roleAuthenticaton('admin'),UploadSingleImage.single('image') , updateAdvocate);
+advocateRouter.get('/single/:id',AuthMiddleWare,roleAuthenticaton('admin'),getSingleAdvocate);
+advocateRouter.get('/all',AuthMiddleWare,roleAuthenticaton('admin'), getAllAdvocates);
+
+
 module.exports = advocateRouter;

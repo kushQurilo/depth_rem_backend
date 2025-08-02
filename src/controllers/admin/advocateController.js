@@ -1,29 +1,37 @@
 const adminModel = require("../../models/adminModel");
 const advocateModel = require("../../models/advocateModel");
-
+const cloudinay = require('../../utilitis/cloudinary');
+const fs = require('fs');
 exports.addAdvocate = async (req, res, next) => {
     try {
         const { admin_id } = req;
+        const imagePath = req?.file.path;
         if (!admin_id) return res.status(401).json({ message: "Unauthorized" });
-        const { availableTime, closingTime } = req.body;
-        if (!availableTime || !closingTime) return res.status(400).json({ success: false, message: "Please fill all fields" });
-        const payload = { availableTime, closingTime, adminId: admin_id }
-        console.log(payload)
+        const { name, whatsapp, contact } = req.body;
+        if (!name || !whatsapp || !contact || !imagePath) return res.status(400).json({ success: false, message: "Please fill all fields" });
+        const payload = { name, whatsappNumber: whatsapp, contactNumber: contact, adminId: admin_id }
         const isAdmin = await adminModel.findOne({ _id: admin_id });
         if (isAdmin) {
-            const advocate = await advocateModel.findOne({ adminId: admin_id });
+            const advocate = await advocateModel.findOne({ contactNumber: contact });
             if (advocate) {
                 return res.status(400)
                     .json({
                         success: false,
-                        message: "Advocate Timing already exists"
+                        message: "Advocate already exists"
                     })
             }
+            const profileImage = await cloudinay.uploader.upload(imagePath, {
+                folder: "Advacte Images"
+            })
+            fs.unlinkSync(imagePath);
+            payload.advocateImage = profileImage.secure_url;
+            payload.imagePublicKey = profileImage.public_id;
             const createAdvocate = await advocateModel.create(payload);
-            if (!createAdvocate) return res.status(400).json({ success: false, message: "failed to add Timing" })
-            return res.status(200).json({ success: true, message: "Timing added successfully" })
+            if (!createAdvocate) return res.status(400).json({ success: false, message: "failed to add" })
+            return res.status(200).json({ success: true, message: "added successfully" })
         }
         return res.status(400)
+
             .json({
                 success: false,
                 message: "Invalid Admin"
@@ -36,61 +44,72 @@ exports.addAdvocate = async (req, res, next) => {
 }
 
 // update timing
-exports.updateTiming = async (req, res, next) => {
+exports.updateAdvocate = async (req, res, next) => {
     try {
         const { admin_id } = req;
-        const {timeid} = req.query
-        const { availableTime, closingTime } = req.body;
-        if (!admin_id) return res.status(401).json({ message: "Unauthorized" })
-        if (!availableTime || !closingTime) return res.status(400).json({
-            success:
-                false, message: "Please fill all fields"
-        })
-        const payload = { availableTime, closingTime }
-        const isTiming = await advocateModel.findById(timeid);
-        if(!isTiming){
-            return res.status(400).json({ success: false, message: "Timing not found" })
+        const imagePath = req.file;
+        const { name, whatsapp, contact } = req.body;
+        if (!admin_id) return res.status(401).json({ message: "Unauthorized" });
+        if (!name || !whatsapp || !contact) return res.status(
+            400).json({ success: false, message: "Please fill all fields" });
+        const payload = { name, whatsappNumber: whatsapp, contactNumber: contact, }
+        const isAdvocate = await advocateModel.findOne({ contactNumber: contact });
+        if (!isAdvocate) return res.status(400).json({ success: false, message: "advocate not found" });
+        if (imagePath) {
+            //delete exist image
+            const existImage = await cloudinay.uploader.destroy(isAdvocate.imagePublicKey);
+            if (existImage.result = 'ok') {
+                const profileImage = await cloudinay.uploader.upload(imagePath.path, {
+                    folder: "Advacte Images",
+                    public: isAdvocate.imagePublicKey,
+                    overwrite: true
+                })
+                fs.unlinkSync(imagePath.path);
+                payload.advocateImage = profileImage.secure_url;
+                payload.imagePublicKey = profileImage.public_id
+                await isAdvocate.updateOne(payload)
+                isAdvocate.save()
+                return res.status(201)
+                    .json({ success: true, message: "Profile Update.." })
+            }
         }
-        const updateTiming = await advocateModel.updateOne({_id:timeid},payload);
-        if(updateTiming.acknowledged ===false){
-            return res.status(400)
-            .json({
-                success: false,
-                message: "Failed to update Timing"
-                });
-        }
-        return res.status(200).json({ success: true, message: "Timing updated successfully" })
-
-    } catch (error) {
-        return res.status(500).json({ message: error.message })
+        await isAdvocate.updateOne(payload)
+        isAdvocate.save();
+        return res.status(201)
+            .json({ success: true, message: "Profile Update.." })
+    } catch (err) {
+        return res.status(500).json({ message: err.message, success: false })
     }
 }
-exports.deleteTiming = async (req, res, next) => {
+
+
+// single advocate profile get
+exports.getSingleAdvocate = async (req, res, next) => {
     try {
         const { admin_id } = req;
-        const {timeid} = req.query
-        const { availableTime, closingTime } = req.body;
-        if (!admin_id) return res.status(401).json({ message: "Unauthorized" })
-        if (!availableTime || !closingTime) return res.status(400).json({
-            success:
-                false, message: "Please fill all fields"
-        })
-        const payload = { availableTime, closingTime }
-        const isTiming = await advocateModel.findById(timeid);
-        if(!isTiming){
-            return res.status(400).json({ success: false, message: "Timing not found" })
-        }
-        const updateTiming = await advocateModel.deleteOne({_id:timeid});
-        if(!updateTiming){
-            return res.status(400)
-            .json({
-                success: false,
-                message: "Failed to delelte Timing"
-                });
-        }
-        return res.status(200).json({ success: true, message: "Timing delete successfully" })
+        const { id } = req.params;
+        if (!admin_id) return res.status(401).json({ message: "Unauthorized" });
+        const advocate = await advocateModel.findById(id);
+        if (!advocate) return res.status(404).json({ success: false, message:"failed to fetch"});
+        return res.status(200).json({ success: true, data: advocate });
+    }catch(error){
+        return res.status(500).json({ message: error.message,success:false })
+    }
+}
 
-    } catch (error) {
-        return res.status(500).json({ message: error.message })
+
+
+// get all advocates
+exports.getAllAdvocates = async (req, res, next) => {
+    try {
+        const advocates = await advocateModel.find({});
+        if(!advocates){
+            return res.status(404).json({ success: false, message: "No advocates found"});
+        }
+        return res.status(200).json({ success: true, data: advocates });
+    }
+    catch(error){
+        return res.status(500)
+        .json({ message: error.message, success: false })
     }
 }

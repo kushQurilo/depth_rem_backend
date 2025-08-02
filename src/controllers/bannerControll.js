@@ -6,6 +6,7 @@ const fs = require('fs');
 exports.createBanner = async (req, res, next) => {
     try {
         const file = req.file;
+        const hyperLink =req.body;
         if (!file) {
             return res.status(404)
                 .json({ message: "Image is required", success: false });
@@ -15,7 +16,7 @@ exports.createBanner = async (req, res, next) => {
             folder: 'Banners',
         });
           fs.unlinkSync(imagePath);
-        const upload = await bannerModel.create({ bannerImage: banner.secure_url,public_id:banner.public_id });
+        const upload = await bannerModel.create({ bannerImage: banner.secure_url,public_id:banner.public_id,hyperLink });
         if (!upload) {
             return res.status(404)
                 .json({ success: false, message: "failed to upload" });

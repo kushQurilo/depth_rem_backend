@@ -6,6 +6,10 @@ const bannerSchema = mongoose.Schema({
     },
     public_id:{
         type:String
+    },
+    heyperLink:{
+        type:String,
+        default:"",
     }
 });
 const bannerModel = new mongoose.model('banner',bannerSchema);
