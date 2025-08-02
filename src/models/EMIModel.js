@@ -1,42 +1,56 @@
-const mongoose =  require('mongoose');
+const mongoose = require('mongoose');
 const EmiSchema = mongoose.Schema({
-    principle:{
-        type:Number,
-        required:true,
+    name: {
+        type: String,
+        required: true,
+        trim: true
     },
-    NumberOFEmi:{
-        type:Number,
-        required:true,
+    phone: {
+        type: String,
+        default: ''
     },
-    EmiAmount:{
-        type:Number,
-        required:true
+    credit_Cards: {
+        type: [String],
+        default: []
     },
-    duedate:{
-        type:String,
-        required:true
+    credit_Amount: {
+        type: [String],
+        default: []
     },
-    loantype:{
-        type:String,
-        required:true
+    CreditTotal: {
+        type: String
     },
-    userId:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true
+    personal_Loan: {
+        type: [String],
+        default: []
     },
-    loanId:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true
+    PL_Amount: {
+        type: [String],
+        default: []
     },
-    paid:{
-        type:String,
-        default:"pending"
+    PL_Total: {
+        type: String,
+        default: ''
     },
-    paidEmis:{
-        type:Number,
-        default:0
+    Service_Fees: {
+        type: String,
+        default: ''
+    },
+    Service_Advance_Total: {
+        type: String,
+        default: ''
+    },
+    Final_Settlement: {
+        type: String,
+        default: ''
+    },
+    Settlement_Percent: {
+        type: String,
+        default: ''
     }
+}, {
+    timestamps: true
 });
 
-const EmiModel = new mongoose.model('emisettlement',EmiSchema);
+const EmiModel = new mongoose.model('emisettlement', EmiSchema);
 module.exports = EmiModel;
