@@ -75,10 +75,7 @@ exports.uploadInvoice = async (req, res, next) => {
             url: publicUrl,
             user_id
         };
-
-
         fs.unlinkSync(filePath);
-
         const result = await InvoiceModel.create(invoiceData);
         if (!result) {
             return res.status(500).json({ message: "Failed to upload invoice" });

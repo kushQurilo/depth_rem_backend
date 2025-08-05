@@ -24,8 +24,6 @@ exports.importUsersFromCSV = async (req, res) => {
     }
 };
 
-
-
 //get all user list for admin
 exports.getUsersList = async (req, res) => {
     try {
