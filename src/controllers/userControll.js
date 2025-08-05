@@ -152,7 +152,7 @@ exports.updateUser = async (req, res, next) => {
     if (phone !== undefined) updateFields.phone = phone;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400)
-        .json({ success: false, message: "invalid user" })
+        .json({ success: false, message: "invalid user" });
     }
     const updateFields = {
       name,email,phone

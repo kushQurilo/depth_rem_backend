@@ -116,3 +116,25 @@ exports.getInvoices = async (req , res, next) => {
             });
     }
 }
+
+
+// get invoice by date
+exports.getInvoicesByMonthYear = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    console.log(month,year)
+    if (!month || !year) {
+      return res.status(400).json({ message: "Month and year required" });
+    }
+    const formattedMonth = month.padStart(2, '0');
+    const regex = new RegExp(`/${formattedMonth}/${year}$`);
+
+    const invoices = await InvoiceModel.find({
+      invoiceDate: { $regex: regex }
+    });
+
+    res.status(200).json({ success: true, count: invoices.length, data: invoices });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
