@@ -35,22 +35,4 @@ app.use(`${baseURI}emi`,EmiSettlementRoute );
 app.use(`${baseURI}driuser`,driRoute);
 app.use(`${baseURI}invoice`,InvoiceRouter);
 
-// // invoice test
-// app.use(`${baseURI}invoice`,UploadSingleImage.single('pdf'),async (req, res, next) => {
-//     try {
-//         const file = req.file.path;
-//         const invoice = await cloudinary.uploader.upload(file,{
-//             folder:"Invoices",
-//             resource_type:'raw'
-//         });
-//         fs.unlinkSync(file);
-//         return res.json(invoice);
-//     }catch(err){
-//         return res.status(500)
-//         .json({
-//             message: 'Faild to upload invoice',
-//         })
-//     }
-// });
-// Invoices/hpbfbes4xmxtaliaapca.pdf
 module.exports = app;

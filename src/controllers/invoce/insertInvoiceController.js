@@ -1,74 +1,118 @@
 const csv = require('csvtojson');
 const fs = require('fs');
 const path = require('path');
+const pdfParse = require('pdf-parse');
 // const InvoiceModel = require('../models/Invoice');
-const cloudinary = require('../../utilitis/cloudinary')
-// exports.uploadInvoice = async (req, res, next) => {
-//     try {
-//         const invoiceData = [];
+const cloudinary = require('../../utilitis/cloudinary');
+const superbase = require('../../config/superbase storage/superbaseConfig');
+const InvoiceModel = require('../../models/InvoiceModel');
 
-//         const result = await csv().fromFile(req.file.path);
-
-//         result.forEach(row => {
-//             const serviceName = row.service || row.settlement || row.product || 'Unknown Service';
-//             const invoice = {
-//                 invoiceNumber: row?.invoiceid || `INV-${Math.floor(1000 + Math.random() * 9000)}`,
-//                 invoiceDate: row?.invoicedate || new Date().toISOString().split('T')[0],
-//                 customer:{
-//                     name: row?.customer || 'Unknown',
-//                     email: row?.email || 'unknown@example.com',
-//                     address: row?.address || 'N/A',
-//                 },
-//                 items: [
-//                     {
-//                         name: serviceName,
-//                         quantity: Number(row?.quantity || 1),
-//                         price: Number(row?.amount || row?.total || 0),
-//                     }
-//                 ],
-//             };
-//             invoiceData.push(invoice);
-//         });
-//         const inserted = await InvoiceModel.insertMany(invoiceData);
-
-//         res.status(200).json({ message: 'Invoices uploaded', data: inserted });
-//         fs.unlinkSync(req.file.path);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ error: 'Something went wrong' });
-//     }
-// };
-// download invoice
-
-// uplaod pdf testing
-
-exports.uploadInvoice = async (req, res, next) => {
-    try{
-        const file = req.file.path;
-    if (!file) {
-        return res.status(404)
-            .json({ message: 'invoice missing' });
-    }
-    const invoice = await cloudinary.uploader.upload(file, {
-        folder:"Invoices",
-        access_mode: "public",
-        resource_type: "raw"
-    });
-    fs.unlinkSync(file);
-    res.json({ message: 'Invoice uploaded', data:{url:invoice.secure_url , public_id:invoice.public_id} });
-    }catch(err){
-        return res.status(500).json({ message: 'Something went wrong' });
-    }
-}
 exports.viewInvoice = async (req, res, next) => {
-    try{
+    try {
         const secure_url = req.params.id;
         return res.redirect(secure_url)
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({ message: 'Something went wrong' });
     }
 }
 exports.downloadInvoice = async (req, res, next) => {
 
+}
+
+
+// test
+exports.uploadInvoice = async (req, res, next) => {
+    try {
+        const {user_id} = req.params;
+        const file = req.file;
+        if (!file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        // Upload PDF to Supabase
+        const filePath = file.path;
+        const fileName = `pdfs/${Date.now()}_${file.originalname}`;
+        const fileBuffer = fs.readFileSync(filePath);
+
+        const { data, error } = await superbase
+            .storage
+            .from('invoices')
+            .upload(fileName, fileBuffer, {
+                contentType: 'application/pdf',
+                upsert: false
+            });
+
+        if (error) {
+            throw new Error("Failed to upload PDF to Supabase: " + error.message);
+        }
+
+        const { data: publicUrlData } = superbase
+            .storage
+            .from('invoices')
+            .getPublicUrl(fileName);
+
+        const publicUrl = publicUrlData.publicUrl;
+
+
+        const buffer = fs.readFileSync(filePath);
+        const pdfData = await pdfParse(buffer);
+        const text = pdfData.text;
+
+
+        const extract = (pattern) => {
+            const match = text.match(pattern);
+            return match ? match[1].trim() : "";
+        };
+
+        const invoiceData = {
+            invoiceDate: extract(/Invoice Date\s+([\d\/]+)/i),
+            serviceName: extract(/Monthly Subscription Fees\s*\n*\(([^)]+)\)/i)
+                ? `Monthly Subscription Fees (${extract(/Monthly Subscription Fees\s*\n*\(([^)]+)\)/i)})`
+                : "Monthly Subscription Fees",
+            totalAmount: extract(/Total Amount\s+₹?\s*([\d,]+)/i),
+            url:publicUrl,
+            user_id
+        };
+
+
+        fs.unlinkSync(filePath);
+       
+        const result = await InvoiceModel.create(invoiceData);
+        if(!result){
+            return res.status(500).json({message: "Failed to upload invoice"});
+        }
+        return res.status(200).json({
+            message: "PDF uploaded",
+            success:true
+        });
+
+    } catch (err) {
+        console.error("Error processing invoice:", err);
+        return res.status(500).json({
+            success:false,
+            message: "Internal Server Error",
+            error: err.message
+        });
+    }
+};
+
+// get all invoices for user
+exports.getInvoices = async (req , res, next) => {
+    try{
+        const {user_id} = req.params;
+        if(!user_id){
+            return res.status(400).json({message: "User required"});
+        } 
+        const result = await InvoiceModel.find({user_id});
+        if(!result){
+            return res.status(404).json({message: "No invoices found"});
+        }
+        return res.status(200).json({success:true, data: result});
+    }catch(error){
+        return res.status(500).json({
+            success:false,
+            message: error.message
+            });
+    }
 }

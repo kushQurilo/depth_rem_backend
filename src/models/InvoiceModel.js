@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 const InvoiceSchema = new mongoose.Schema({
-    date:{
+    user_id:{
+        type:mongoose.Schema.Types.ObjectId,
+    },
+    InvoiceDate:{
         type:Date
     },
-    paymentAmount:{
+    ServiceName:{
         type:String
     },
-    amount:{
+    TotalAmount:{
+        type:String
+    },
+    url:{
         type:String
     }
 }, { strict: false });
