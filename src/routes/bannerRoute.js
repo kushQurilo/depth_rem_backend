@@ -9,5 +9,5 @@ bannerRouter.post('/upload',UploadSingleImage.single("image"),createBanner);
 bannerRouter.get('/',getBanner);
 bannerRouter.post('/bannertext',UploadSingleImage.single("image"),bannerWithTitle);
 bannerRouter.get('/all',getBannerWithTitle);
-bannerRouter.delete('/delete-banner',AuthMiddleWare,roleAuthenticaton('admin'),deleteBanner)
+bannerRouter.delete('/delete',deleteBanner)
 module.exports = bannerRouter;

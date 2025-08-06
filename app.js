@@ -16,6 +16,7 @@ const UploadSingleImage = require('./src/middlewares/singleImageUpload');
 const cloudinary = require('./src/utilitis/cloudinary');4
 const fs = require('fs');
 const InvoiceRouter = require('./src/routes/invoiceRoute');
+const TncRoutetr = require('./src/routes/TncRouter');
 const app = express();
 const baseURI = '/api/v1/'
 app.use(express.urlencoded({extended:true}));
@@ -34,5 +35,5 @@ app.use(`${baseURI}kyc`,KycRouters);
 app.use(`${baseURI}emi`,EmiSettlementRoute );
 app.use(`${baseURI}driuser`,driRoute);
 app.use(`${baseURI}invoice`,InvoiceRouter);
-
+app.use(`${baseURI}tnc`,TncRoutetr);
 module.exports = app;

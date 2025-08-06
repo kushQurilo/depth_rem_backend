@@ -19,6 +19,10 @@ const kycSchema = mongoose.Schema({
     status:{
         type:String,
         default:"pending"
+    },
+    date:{
+        type:Date,
+        default:Date.now()
     }
 });
 const KYCmodel = mongoose.model('kyc',kycSchema);

@@ -1,8 +1,10 @@
 
 const adminModel = require('../../models/adminModel');
 const DRIModel = require('../../models/DriWorkModel');
+const cloudinary = require('../../utilitis/cloudinary');
 exports.createDRI = async (req, res, next) => {
     try{
+        const file = req.file.path;
         const { title, content } = req.body;
     const { admin_id } = req;
 
@@ -10,7 +12,9 @@ exports.createDRI = async (req, res, next) => {
         return res.status(400).json({ success, message: "Invalid Credentials." });
     }
     const payload = { adminId: admin_id, title, content }
-    
+        const image = await cloudinary.uploader.upload(file,{
+            folder:"dri work avar"
+        })
     const isAdmin = await adminModel.findOne({_id:admin_id});
     if (!isAdmin) {
         return res.status(400).json({ success:false, message: "Invalid Admin Try Again." });

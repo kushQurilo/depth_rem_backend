@@ -8,6 +8,6 @@ const KycRouters = require('express').Router();
 
 KycRouters.post('/add-kyc',cloudinaryUploader.array('image',2),UserAuthMiddleWare,roleAuthenticaton('user'),CompleteKYC);
 KycRouters.post('/approve-kyc',AuthMiddleWare,roleAuthenticaton('admin'),ApproveByAdmin);
-KycRouters.get('/get-kyc',AuthMiddleWare,roleAuthenticaton('admin'),getAllKycDetails);
+KycRouters.get('/get-kyc',getAllKycDetails);
 KycRouters.get('/single-kyc',AuthMiddleWare,roleAuthenticaton('admin'), getSingleKycDetails);
 module.exports = KycRouters
