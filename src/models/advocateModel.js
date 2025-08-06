@@ -18,7 +18,7 @@ const advocateSchema = mongoose.Schema({
     },
     date:{
         type:Date,
-        default:Date.now()
+        default:Date.now().toLocaleString()
     }
 },{strict:false});
 const advocateModel = new mongoose.model('advocate',advocateSchema);

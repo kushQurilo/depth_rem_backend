@@ -26,13 +26,6 @@ exports.addAdvocate = async (req, res, next) => {
             const createAdvocate = await advocateModel.create(payload);
             if (!createAdvocate) return res.status(400).json({ success: false, message: "failed to add" })
             return res.status(200).json({ success: true, message: "added successfully" })
-        
-        return res.status(400)
-
-            .json({
-                success: false,
-                message: "Invalid Admin"
-            })
 
     }
     catch (error) {
