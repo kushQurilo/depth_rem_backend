@@ -4,15 +4,12 @@ const cloudinay = require('../../utilitis/cloudinary');
 const fs = require('fs');
 exports.addAdvocate = async (req, res, next) => {
     try {
-        const { admin_id } = req;
-        const imagePath = req?.file.path;
-        if (!admin_id) return res.status(401).json({ message: "Unauthorized" });
-        const { name, whatsapp, contact } = req.body;
-        if (!name || !whatsapp || !contact || !imagePath) return res.status(400).json({ success: false, message: "Please fill all fields" });
-        const payload = { name, whatsappNumber: whatsapp, contactNumber: contact, adminId: admin_id }
-        const isAdmin = await adminModel.findOne({ _id: admin_id });
-        if (isAdmin) {
-            const advocate = await advocateModel.findOne({ contactNumber: contact });
+        const imagePath = req.file.path;
+
+        const { name, whatsappNumber, contactNumber } = req.body;
+        if (!name || !whatsappNumber || !contactNumber|| !imagePath) return res.status(400).json({ success: false, message: "Please fill all fields" });
+        const payload = { name, whatsappNumber, contactNumber }
+            const advocate = await advocateModel.findOne({ contactNumber});
             if (advocate) {
                 return res.status(400)
                     .json({
@@ -21,7 +18,7 @@ exports.addAdvocate = async (req, res, next) => {
                     })
             }
             const profileImage = await cloudinay.uploader.upload(imagePath, {
-                folder: "Advacte Images"
+                folder: "AdvacteImages"
             })
             fs.unlinkSync(imagePath);
             payload.advocateImage = profileImage.secure_url;
@@ -29,7 +26,7 @@ exports.addAdvocate = async (req, res, next) => {
             const createAdvocate = await advocateModel.create(payload);
             if (!createAdvocate) return res.status(400).json({ success: false, message: "failed to add" })
             return res.status(200).json({ success: true, message: "added successfully" })
-        }
+        
         return res.status(400)
 
             .json({
@@ -39,6 +36,7 @@ exports.addAdvocate = async (req, res, next) => {
 
     }
     catch (error) {
+        console.log(error)
         return res.status(500).json({ message: error.message })
     }
 }
@@ -90,10 +88,10 @@ exports.getSingleAdvocate = async (req, res, next) => {
         const { id } = req.params;
         if (!admin_id) return res.status(401).json({ message: "Unauthorized" });
         const advocate = await advocateModel.findById(id);
-        if (!advocate) return res.status(404).json({ success: false, message:"failed to fetch"});
+        if (!advocate) return res.status(404).json({ success: false, message: "failed to fetch" });
         return res.status(200).json({ success: true, data: advocate });
-    }catch(error){
-        return res.status(500).json({ message: error.message,success:false })
+    } catch (error) {
+        return res.status(500).json({ message: error.message, success: false })
     }
 }
 
@@ -103,13 +101,13 @@ exports.getSingleAdvocate = async (req, res, next) => {
 exports.getAllAdvocates = async (req, res, next) => {
     try {
         const advocates = await advocateModel.find({});
-        if(!advocates){
-            return res.status(404).json({ success: false, message: "No advocates found"});
+        if (!advocates) {
+            return res.status(404).json({ success: false, message: "No advocates found" });
         }
         return res.status(200).json({ success: true, data: advocates });
     }
-    catch(error){
+    catch (error) {
         return res.status(500)
-        .json({ message: error.message, success: false })
+            .json({ message: error.message, success: false })
     }
 }

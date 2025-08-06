@@ -15,6 +15,10 @@ const DRISchema = mongoose.Schema({
     avatar:{
         type:String,
         default:'.jpb/png'
+    },
+    public_id:{
+        type:String,
+        required:true
     }
 });
 

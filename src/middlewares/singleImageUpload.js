@@ -11,4 +11,5 @@ const UploadSingle = multer.diskStorage({
 });
 
 const UploadSingleImage = multer({ storage: UploadSingle });
+
 module.exports = UploadSingleImage;

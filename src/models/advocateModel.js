@@ -15,6 +15,10 @@ const advocateSchema = mongoose.Schema({
     advocateImage:{
         type:String,
         default:"xyz.jpg"
+    },
+    date:{
+        type:Date,
+        default:Date.now()
     }
 },{strict:false});
 const advocateModel = new mongoose.model('advocate',advocateSchema);
