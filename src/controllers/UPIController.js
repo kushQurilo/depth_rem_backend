@@ -5,7 +5,7 @@ exports.createUPI = async (req, res, next) => {
     try {
         const { upi_id } = req.body;
         const filePath = req.file?.path;
-        console.log({upi_id ,filePath})
+        console.log({ upi_id, filePath })
         if (!upi_id || !filePath) {
             return res.status(400).json({ message: "Credentials missing" });
         }
@@ -35,7 +35,6 @@ exports.createUPI = async (req, res, next) => {
         return res.status(500).json({ message: error.message, error });
     }
 };
-
 
 //get upi
 exports.getUPI = async (req, res, next) => {

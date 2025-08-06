@@ -7,25 +7,25 @@ exports.addAdvocate = async (req, res, next) => {
         const imagePath = req.file.path;
 
         const { name, whatsappNumber, contactNumber } = req.body;
-        if (!name || !whatsappNumber || !contactNumber|| !imagePath) return res.status(400).json({ success: false, message: "Please fill all fields" });
+        if (!name || !whatsappNumber || !contactNumber || !imagePath) return res.status(400).json({ success: false, message: "Please fill all fields" });
         const payload = { name, whatsappNumber, contactNumber }
-            const advocate = await advocateModel.findOne({ contactNumber});
-            if (advocate) {
-                return res.status(400)
-                    .json({
-                        success: false,
-                        message: "Advocate already exists"
-                    })
-            }
-            const profileImage = await cloudinay.uploader.upload(imagePath, {
-                folder: "AdvacteImages"
-            })
-            fs.unlinkSync(imagePath);
-            payload.advocateImage = profileImage.secure_url;
-            payload.imagePublicKey = profileImage.public_id;
-            const createAdvocate = await advocateModel.create(payload);
-            if (!createAdvocate) return res.status(400).json({ success: false, message: "failed to add" })
-            return res.status(200).json({ success: true, message: "added successfully" })
+        const advocate = await advocateModel.findOne({ contactNumber });
+        if (advocate) {
+            return res.status(400)
+                .json({
+                    success: false,
+                    message: "Advocate already exists"
+                })
+        }
+        const profileImage = await cloudinay.uploader.upload(imagePath, {
+            folder: "AdvacteImages"
+        })
+        fs.unlinkSync(imagePath);
+        payload.advocateImage = profileImage.secure_url;
+        payload.imagePublicKey = profileImage.public_id;
+        const createAdvocate = await advocateModel.create(payload);
+        if (!createAdvocate) return res.status(400).json({ success: false, message: "failed to add" })
+        return res.status(200).json({ success: true, message: "added successfully" })
 
     }
     catch (error) {
