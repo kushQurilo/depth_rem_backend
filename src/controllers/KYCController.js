@@ -9,7 +9,7 @@ exports.CompleteKYC = async (req, res, next) => {
   try {
     const results = [];
     const { user_id } = req;
-    const { name } = req.body;
+    const { name ,lastname , email ,gender } = req.body;
     // const 
     if (!name || !user_id) {
       return res.status(400).json({ message: "Please fill all the fields", success: false });
@@ -55,6 +55,9 @@ exports.CompleteKYC = async (req, res, next) => {
       pan: results[2],
       name,
       user_id,
+      lastname,
+      email,
+      gender
     };
 
     const uploadKyc = await KYCmodel.create(payload);
@@ -77,8 +80,7 @@ exports.CompleteKYC = async (req, res, next) => {
 exports.ApproveByAdmin = async (req, res) => {
     try {
         const { admin_id } = req;
-        const { user_id, kycId } = req.query;
-        console.log({ kycId, user_id })
+        const { user_id, kycId,id } = req.query;
         if (!admin_id) {
             return res.status(400).json({
                 success: false,
@@ -116,6 +118,7 @@ exports.ApproveByAdmin = async (req, res) => {
 
         }
         isKYC.status = "approve";
+        isKYC.id =id;
         await isKYC.save();
 
         return res.status(200).json({
@@ -132,8 +135,6 @@ exports.ApproveByAdmin = async (req, res) => {
         });
     }
 };
-
-
 exports.getAllKycDetails = async (req, res) => { 
     try {
         const fetchKYCUsers = await KYCmodel.find({}).populate('user_id'); // Only populate phoneNumber
