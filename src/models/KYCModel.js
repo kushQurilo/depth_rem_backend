@@ -1,29 +1,44 @@
 const mongoose = require('mongoose');
-const kycSchema = mongoose.Schema({
-    user_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:[true,'user missing']
+
+const kycSchema = new mongoose.Schema({
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, 'user missing']
     },
-    name:{
+    id:{
+        type: String,
+    },
+    image:{
         type:String,
-        required:[true, 'name required']
+        required:[true,'image missing']
     },
-    aadhar:{
-        type:String,
-        require:[true, 'Aadhar required']
+    name: {
+        type: String,
+        required: [true, 'name required']
     },
-    pan:{
-        type:String,
-        required:[true,'Pan Card required']
+    aadhar: {
+        type: String,
+        required: [true, 'Aadhar required']
     },
-    status:{
-        type:String,
-        default:"pending"
+    pan: {
+        type: String,
+        required: [true, 'Pan Card required']
     },
-    date:{
-        type:Date,
-        default:Date.now()
+    status: {
+        type: String,
+        default: 'pending'
+    },
+    date: {
+        type: String,
+        default: () => {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            return `${day}/${month}/${year}`; // format: dd/mm/yyyy
+        }
     }
 });
-const KYCmodel = mongoose.model('kyc',kycSchema);
+
+const KYCmodel = mongoose.model('kyc', kycSchema);
 module.exports = KYCmodel;

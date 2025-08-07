@@ -20,10 +20,10 @@ const TncRoutetr = require('./src/routes/TncRouter');
 const privacyPolicyRouter = require('./src/routes/privacyPolicyRoute');
 const QRUPIRouter = require('./src/routes/UpiAndQrRoute');
 const app = express();
-const baseURI = '/api/v1/'
+app.use(cors());
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
-app.use(cors())
+const baseURI = '/api/v1/'
 app.use('banner',express.static(path.resolve('public/uploads/banner')));
 app.use(`${baseURI}admin`,adminRouter);
 app.use(`${baseURI}user`,userRouter);

@@ -73,7 +73,6 @@ exports.updateAdvocate = async (req, res, next) => {
     }
 }
 
-
 // single advocate profile get
 exports.getSingleAdvocate = async (req, res, next) => {
     try {
@@ -91,7 +90,7 @@ exports.getSingleAdvocate = async (req, res, next) => {
 
 
 // get all advocates
-exports.getAllAdvocates = async (req, res, next) => {
+exports.getAllAdvocates = async (req, res, next) => { 
     try {
         const advocates = await advocateModel.find({});
         if (!advocates) {

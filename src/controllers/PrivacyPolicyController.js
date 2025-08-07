@@ -10,7 +10,7 @@ exports.privacyPolicy = async (req, res, next) => {
         if (!privacyPolicy) {
             return res.status(400).json({ message: "Failed to create privacy policy" });
         }
-        res.status(201).json({ message: "Privacy policy created successfully" });
+        res.status(201).json({ message: "Privacy policy created successfully",success:true });
     } catch (err) {
 
     }

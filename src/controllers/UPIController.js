@@ -5,12 +5,12 @@ exports.createUPI = async (req, res, next) => {
     try {
         const { upi_id } = req.body;
         const filePath = req.file?.path;
-        console.log({ upi_id, filePath })
+        // console.log({ upi_id, filePath })
         if (!upi_id || !filePath) {
             return res.status(400).json({ message: "Credentials missing" });
         }
-        fs.unlinkSync(filePath);
-        const existingUPI = await UPIModel.find();
+        const existingUPI = await UPIModel.findOne();
+        // console.log('sss',existingUPI);
         if (existingUPI.length !== 0) {
             return res.status(200).json({
                 success: true,

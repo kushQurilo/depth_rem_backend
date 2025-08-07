@@ -10,7 +10,7 @@ exports.CompleteKYC = async (req, res, next) => {
     const results = [];
     const { user_id } = req;
     const { name } = req.body;
-
+    // const 
     if (!name || !user_id) {
       return res.status(400).json({ message: "Please fill all the fields", success: false });
     }
@@ -50,8 +50,9 @@ exports.CompleteKYC = async (req, res, next) => {
     }
 
     const payload = {
-      aadhar: results[0],
-      pan: results[1],
+      image:results[0],
+      aadhar: results[1],
+      pan: results[2],
       name,
       user_id,
     };
@@ -135,13 +136,6 @@ exports.ApproveByAdmin = async (req, res) => {
 
 exports.getAllKycDetails = async (req, res) => {
     try {
-        const { admin_id } = req;
-        if (!admin_id) {
-            return res.status(404).json({
-                success: false,
-                message: "Invalid admin details"
-            })
-        }
         const fetchKYCUsers = await KYCmodel.find({});
         if (!fetchKYCUsers) {
             return res.status(404).json({
