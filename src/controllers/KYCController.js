@@ -134,26 +134,26 @@ exports.ApproveByAdmin = async (req, res) => {
 };
 
 
-exports.getAllKycDetails = async (req, res) => {
+exports.getAllKycDetails = async (req, res) => { 
     try {
-        const fetchKYCUsers = await KYCmodel.find({});
-        if (!fetchKYCUsers) {
+        const fetchKYCUsers = await KYCmodel.find({}).populate('user_id'); // Only populate phoneNumber
+        console.log("dta",fetchKYCUsers)
+        if (!fetchKYCUsers || fetchKYCUsers.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Something went wrong try again..."
+                message: "No KYC details found."
             });
         }
-        return res.status(200)
-            .json({
-                success: true,
-                data: fetchKYCUsers
-            })
+
+        return res.status(200).json({
+            success: true,
+            data: fetchKYCUsers
+        });
     } catch (error) {
-        return res.status(500)
-            .json({
-                success: false,
-                message: error.message
-            })
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 }
 

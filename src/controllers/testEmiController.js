@@ -90,8 +90,7 @@ cron.schedule("0 10 * * *", async () => {
   plans.forEach(plan => {
     const emi = plan.emis.find(e => !e.isPaid && new Date(e.dueDate).toDateString() === target.toDateString());
     if (emi) {
-      console.log(`⏰ Notify ${plan.user.phoneNumber}: EMI of ₹${plan.emiAmount} due on ${emi.dueDate.toDateString()}`);
-      // Later: send email/SMS/Push here
+      console.log(`Notify ${plan.user.phoneNumber}: EMI of ₹${plan.emiAmount} due on ${emi.dueDate.toDateString()}`);
     }
   });
 });

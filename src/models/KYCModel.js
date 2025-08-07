@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const kycSchema = new mongoose.Schema({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
-        required: [true, 'user missing']
+        required: [true, 'user missing'],
+        ref:'user'
     },
     id:{
         type: String,
