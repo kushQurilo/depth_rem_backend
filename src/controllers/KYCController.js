@@ -137,7 +137,7 @@ exports.ApproveByAdmin = async (req, res) => {
 };
 exports.getAllKycDetails = async (req, res) => { 
     try {
-        const fetchKYCUsers = await KYCmodel.find({}).populate('user_id'); // Only populate phoneNumber
+        const fetchKYCUsers = await KYCmodel.find({}).populate('user_id');
         console.log("dta",fetchKYCUsers)
         if (!fetchKYCUsers || fetchKYCUsers.length === 0) {
             return res.status(404).json({
