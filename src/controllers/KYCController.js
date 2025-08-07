@@ -190,33 +190,3 @@ exports.getSingleKycDetails = async (req, res, next) => {
         })
     }
 }
-
-
-
-
-
-// testin
-// exports.uploadKycTesting = async (req, res, next) => {
-//     try {
-//         const results = [];
-//         for (const file of req.files) {
-//             const filePath = file.path;
-//             const result = await cloudinary.uploader.upload(filePath, {
-//                 folder: "Kyc Documents",
-//             });
-//             fs.unlinkSync(filePath);
-//             results.push(result.secure_url);
-//         }
-//         console.log(results)
-//         return res.status(200).json({
-//             success: true,
-//             message: "Images uploaded",
-//             imageUrls: results,
-//         });
-//     } catch (err) {
-//         return res.status(500).json({
-//             success: false,
-//             message: err.message,
-//         });
-//     }
-// };
