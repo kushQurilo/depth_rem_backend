@@ -8,7 +8,6 @@ exports.createDRI = async (req, res, next) => {
         const file = req.file.path;
         const { title, content } = req.body;
         const { admin_id } = req;
-
         if (!admin_id || !title || !content) {
             return res.status(400).json({ success, message: "Invalid Credentials." });
         }
@@ -37,23 +36,36 @@ exports.createDRI = async (req, res, next) => {
 
 exports.updateDri = async (req, res, next) => {
     try {
-        const { admin_id } = req;
-        const { title, content, driId } = req.body;
-
-        if (!admin_id || !title || !content || !driId) {
+        const file = req.file.path;
+       
+        const { title, content, driId, public_id } = req.body;
+        console.log("body",req.body)
+        if (!title || !content || !driId || !public_id) {
             return res.status(400).json({ success: false, message: "Invalid Credentials." });
         }
-        const isAdmin = await adminModel.findById(admin_id);
-        if (isAdmin) {
-            const updateDRI = await DRIModel.findByIdAndUpdate(driId, { title, content }, { new: true });
+            const banenr = await cloudinary.uploader.destroy(public_id);
+            if (banenr?.result === 'ok') {
+                const image = await cloudinary.uploader.upload(file, {
+                    folder: "driWorkAvatar"
+                })
+                 fs.unlinkSync(file)
+                const payload ={
+                    title,
+                    content,
+                    avatar:image.secure_url,
+                    public_id:image.public_id
+                }
+                const updateDRI = await DRIModel.findByIdAndUpdate(driId, payload, { new: true });
             if (!updateDRI) {
                 return res.status(400).json({ success: false, message: "Failed to Update DRI Works" });
             }
             return res.status(200).json({ success: true, message: "DRI Works Updated Successfully" });
-        }
-        return res.status(400).json({ success: false, message: "Invalid Admin Try Again." });
+            }
+        
+        return res.status(400).json({ success: false, message: "something went worng." });
     }
     catch (error) {
+        console.log(error)
         return res.status(500)
             .json({ success: false, message: error.message })
     }

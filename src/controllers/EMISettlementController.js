@@ -7,6 +7,7 @@ exports.EMISettlement = async (req, res) => {
     try {
         const data = [];
         const result = await csv().fromFile(req.file.path);
+
         result.forEach((element) => {
             data.push({
                 name: element?.Person || element?.person || '',
@@ -20,9 +21,11 @@ exports.EMISettlement = async (req, res) => {
                 Service_Fees: element?.ServiceTotal || element?.servicetotal || '',
                 Service_Advance_Total: element?.AdvanceTotal || element?.advancetotal || '',
                 Final_Settlement: element?.FinalSettlement || element?.finalsettlement || '',
-                Settlement_Percent: element?.SettlementPercent || element?.settlementpercent || ''
+                Settlement_Percent: element?.SettlementPercent || element?.settlementpercent || '',
+                totalEMI: element?.TotalEMI || element?.totalemi || ''
             });
         });
+
         const output = {
             name: '',
             phone: '',
@@ -35,10 +38,12 @@ exports.EMISettlement = async (req, res) => {
             Service_Fees: '',
             Service_Advance_Total: '',
             Final_Settlement: '',
-            Settlement_Percent: ''
+            Settlement_Percent: '',
+            TotalEMI: ""
         };
 
         data.forEach((entry) => {
+            if (entry.totalEMI) output.TotalEMI = entry.totalEMI;
             if (entry.name) output.name = entry.name;
             if (entry.phone) output.phone = entry.phone;
 
@@ -77,9 +82,10 @@ exports.EMISettlement = async (req, res) => {
             }
         });
 
+        console.log("Output:", output);
         fs.unlinkSync(req.file.path); // delete temp CSV
-        const setEmi = await EmiModel.create(output);
 
+        const setEmi = await EmiModel.create(output);
         if (!setEmi) {
             return res.status(400).send({ message: "Error in add EMI" });
         }
@@ -91,7 +97,6 @@ exports.EMISettlement = async (req, res) => {
         return res.status(500).send({ message: "Server Error", error: err.message });
     }
 };
-
 
 exports.EMIPayment = async (req, res, next) => {
     try {

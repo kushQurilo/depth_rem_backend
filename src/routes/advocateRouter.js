@@ -6,7 +6,7 @@ const UploadSingleImage = require("../middlewares/singleImageUpload");
 const advocateRouter = require("express").Router();
 advocateRouter.post('/add',UploadSingleImage.single('image'),addAdvocate);
 advocateRouter.put('/update',AuthMiddleWare,roleAuthenticaton('admin'),UploadSingleImage.single('image') , updateAdvocate);
-advocateRouter.get('/single/:id',getSingleAdvocate);
+advocateRouter.get('/single/:id',AuthMiddleWare,getSingleAdvocate);
 advocateRouter.get('/all', getAllAdvocates);
 
 

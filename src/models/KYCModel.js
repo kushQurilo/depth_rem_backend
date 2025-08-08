@@ -47,7 +47,11 @@ const kycSchema = new mongoose.Schema({
     gender:{
         type:String,
         required:[true,'gender require']
-    }
+    },
+    assign_advocate:{
+        type:String,
+        ref:'advocate'
+    },
 });
 
 const KYCmodel = mongoose.model('kyc', kycSchema);
