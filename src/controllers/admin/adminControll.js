@@ -1,7 +1,9 @@
 const adminModel = require("../../models/adminModel");
 const jwt = require('jsonwebtoken');
 const { hashPassword, compareHashPassword } = require("../../utilitis/hashPash");
-
+const fs = require('fs');
+const cloudinary = require('../../utilitis/cloudinary');
+const adminAndLoginBannerModel = require("../../models/adminAndLoginBannerModel");
 exports.createAdmin = async (req, res) => {
   try {
     const { name, email, phone, password, role } = req.body;
@@ -260,5 +262,172 @@ exports.getBarcodeAndUpi = async (req, res, next) => {
       message: "Server error",
       error: err.message,
     });
+  }
+}
+
+// login backgroudd api
+exports.addLoginBackground = async (req, res, next) => {
+  try {
+    const { admin_id } = req;
+    const file = req.file.path;
+    if (!admin_id) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "admin invalid"
+        })
+    }
+    if (!file) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "file missing"
+        })
+    }
+    const image = await cloudinary.uploader.upload(file, {
+      folder: 'admin_and_login_banners'
+    });
+    if (!image) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "Faild to upload image"
+        })
+    }
+    const payload = {
+      loginBanner: image.secure_url,
+      loginBanner_public_key: image.public_id
+    }
+    const store = await adminAndLoginBannerModel.create(payload);
+    if (store.length === 0 || !store) {
+      return res.status(404)
+        .json({
+          success: false,
+          message: "Faild.. try agian."
+        })
+    }
+    return res.status(201)
+      .json({
+        success: true,
+        message: "upload done."
+      })
+  } catch (error) {
+    return res.status(500)
+      .json({
+        success: false,
+        message: error.message,
+        error
+      })
+  }
+}
+
+
+//  get login banner
+exports.adminDashboardBanner = async (req, res, next) => {
+  try {
+    const { admin_id } = req;
+    const file = req.file.path;
+    if (!admin_id) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "admin invalid"
+        })
+    }
+    if (!file) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "file missing"
+        })
+    }
+    const image = await cloudinary.uploader.upload(file, {
+      folder: 'admin_and_login_banners'
+    });
+    if (!image) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "Faild to upload image"
+        })
+    }
+    const payload = {
+      adminBanner: image.secure_url,
+      adminBanner_public_key: image.public_id
+    }
+    const store = await adminAndLoginBannerModel.create(payload);
+    if (store.length === 0 || !store) {
+      return res.status(404)
+        .json({
+          success: false,
+          message: "Faild.. try agian."
+        })
+    }
+    return res.status(201)
+      .json({
+        success: true,
+        message: "upload done."
+      })
+  } catch (error) {
+    return res.status(500)
+      .json({
+        success: false,
+        message: error.message,
+        error
+      })
+  }
+}
+
+
+// delelte login banner
+exports.deletLoginDashboardBanner = async (req, res, next) => {
+  try {
+    const { admin_id } = req;
+    const { public_id } = req.params;
+    if (!admin_id) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "admin invalid"
+        })
+    }
+    if (!public_id) {
+      return res.status(400)
+        .json({
+          success: false,
+          message: "image credentials missing"
+        })
+    }
+    const image = await cloudinary.uploader.destroy(public_id);
+    if (image.result === "ok") {
+      const res = await adminAndLoginBannerModel.deleteOne({
+        $or: [
+          { loginBanner_public_key: public_id },
+          { adminBanner_public_key: public_id }
+        ]
+      });
+      if (!res) {
+        return res.status(404)
+          .json({ success: false, message: 'unable to delete image' })
+      }
+      return res.status(201)
+        .json({
+          success: true,
+          message: "Image delete"
+        })
+    }
+    return res.status(400)
+      .json({
+        success: false,
+        message: "Faild to delete image"
+      })
+
+  } catch (error) {
+    return res.status(500)
+      .json({
+        success: false,
+        message: error.message,
+        error
+      })
   }
 }
