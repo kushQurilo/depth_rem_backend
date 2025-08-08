@@ -80,7 +80,7 @@ exports.bannerWithTitle = async (req, res, next) => {
             bannerTitle: title,
             public_id:banner.public_id,
         }
-        console.log(paylod)
+
         const bannerRes = await bannerWithTitle.create(paylod);
         if(!bannerRes){
             return res.status(400)

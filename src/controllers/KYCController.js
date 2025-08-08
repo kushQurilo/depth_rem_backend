@@ -162,7 +162,6 @@ exports.ApproveByAdmin = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error in ApproveByAdmin:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -173,7 +172,6 @@ exports.ApproveByAdmin = async (req, res) => {
 exports.getAllKycDetails = async (req, res) => {
   try {
     const fetchKYCUsers = await KYCmodel.find({}).populate('user_id');
-    console.log("dta", fetchKYCUsers)
     if (!fetchKYCUsers || fetchKYCUsers.length === 0) {
       return res.status(404).json({
         success: false,

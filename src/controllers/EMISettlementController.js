@@ -81,8 +81,6 @@ exports.EMISettlement = async (req, res) => {
                 output.Settlement_Percent = entry.Settlement_Percent;
             }
         });
-
-        console.log("Output:", output);
         fs.unlinkSync(req.file.path); // delete temp CSV
 
         const setEmi = await EmiModel.create(output);

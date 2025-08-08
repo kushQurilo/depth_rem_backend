@@ -37,8 +37,10 @@ exports.getAllPolicy = async (req, res, next) => {
 //update privacy policy
 exports.updatePrivacyPolicy = async (req, res, next) => {
     try {
+        const {id} = req.params;
         const title = req.body.title;
         const points = req.body.points;
+        const update = await prvivayPolicyModel.updateOne()
     } catch (err) {
         return res.status(500)
             .json({
