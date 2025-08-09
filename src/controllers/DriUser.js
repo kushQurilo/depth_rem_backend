@@ -41,3 +41,41 @@ exports.getUsersList = async (req, res) => {
 
 // update user details 
 
+
+
+
+exports.searchUserById = async (req, res) => {
+  try {
+    console.log(req.query)
+    const search = req.query;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "ID query parameter is required.",
+      });
+    }
+
+    // Use a case-insensitive regex for partial matching
+    const users = await DrisModel.find({
+      id: { $regex: search.id, $options: "i" }, // case-insensitive
+    });
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No matching users found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

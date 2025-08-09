@@ -1,10 +1,10 @@
 const express = require("express");
-const router = express.Router();
-const upload = require("../middleware/upload");
-const emiController = require("../controllers/emiController");
+const emiRouters = express.Router();
+const UploadSingleImage = require("../middlewares/singleImageUpload");
+const { uploadEMICSV, payEmi, getEmiStatus } = require("../controllers/testEmiController");
 
-router.post("/admin/upload-emi", upload.single("csv"), emiController.uploadEMICSV);
-router.patch("/emi/pay/:userId", emiController.payEmi);
-router.get("/emi/status/:userId", emiController.getEmiStatus);
+emiRouters.post("/upload-emi", UploadSingleImage.single("csv"), uploadEMICSV);
+emiRouters.patch("/emi/pay/:userId", payEmi);
+emiRouters.get("/emi/status/:userId", getEmiStatus);
 
-module.exports = router;
+module.exports = emiRouters;

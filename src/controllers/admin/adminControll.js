@@ -88,6 +88,31 @@ exports.loginAdmin = async (req, res, next) => {
 }
 
 
+exports.uploadProfileImage = async (req, res) => {
+  try {
+    const {admin_id} = req;
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+      folder: "driadmiprofile"
+    });
+    fs.unlinkSync(req.file.path);
+    const user = await adminModel.findByIdAndUpdate(admin_id,{
+        image: uploadResult.secure_url, 
+        public_id: uploadResult.public_id,  },
+      { new: true }
+    );
+    res.status(200).json({
+      message: "Profile image uploaded successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 exports.addBarcodeWithUpi = async (req, res, next) => {
   try {
     const { admin_id, imagePath } = req;
@@ -121,13 +146,14 @@ exports.addBarcodeWithUpi = async (req, res, next) => {
 
 exports.updateAdminDetails = async (req, res) => {
   try {
-    const { admin_id, role } = req;
-    const { name, email, phone } = req.body;
+    const { admin_id } = req;
+    const { email, phone } = req.body;
 
-    if (!name && !email && !phone && !role && !admin_id && !role) {
+    // Validate inputs
+    if (!email && !phone) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Please provide email or phone to update",
       });
     }
 
@@ -145,15 +171,13 @@ exports.updateAdminDetails = async (req, res) => {
       });
     }
 
-    const updates = {};
-    if (name) updates.name = name;
-    if (email) updates.email = email;
-    if (phone) updates.phone = phone;
-    if (role) updates.role = role;
-
+    // Check email uniqueness
     if (email) {
-      const existing = await adminModel.findOne({ email, _id: { $ne: admin_id } });
-      if (existing) {
+      const existingEmail = await adminModel.findOne({
+        email,
+        _id: { $ne: admin_id },
+      });
+      if (existingEmail) {
         return res.status(409).json({
           success: false,
           message: "Email is already in use",
@@ -161,21 +185,31 @@ exports.updateAdminDetails = async (req, res) => {
       }
     }
 
+    // Check phone uniqueness
     if (phone) {
-      const existing = await adminModel.findOne({ phone, _id: { $ne: admin_id } });
-      if (existing) {
+      const existingPhone = await adminModel.findOne({
+        phone,
+        _id: { $ne: admin_id },
+      });
+      if (existingPhone) {
         return res.status(409).json({
           success: false,
           message: "Phone number is already in use",
         });
       }
     }
-    const updated = await adminModel.findByIdAndUpdate(admin_id, updates, {
+
+    // Prepare update object
+    const updates = {};
+    if (email) updates.email = email;
+    if (phone) updates.phone = phone;
+
+    const updatedAdmin = await adminModel.findByIdAndUpdate(admin_id, updates, {
       new: true,
       runValidators: true,
     });
 
-    if (!updated) {
+    if (!updatedAdmin) {
       return res.status(404).json({
         success: false,
         message: "Admin not found",
@@ -185,8 +219,8 @@ exports.updateAdminDetails = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Admin details updated successfully",
+      data: updatedAdmin,
     });
-
   } catch (err) {
     return res.status(500).json({
       success: false,
@@ -195,6 +229,7 @@ exports.updateAdminDetails = async (req, res) => {
     });
   }
 };
+
 
 
 
@@ -341,6 +376,7 @@ exports.adminDashboardBanner = async (req, res, next) => {
           message: "file missing"
         })
     }
+    console.log(file.admin_id)
     const image = await cloudinary.uploader.upload(file, {
       folder: 'admin_and_login_banners'
     });
@@ -377,8 +413,6 @@ exports.adminDashboardBanner = async (req, res, next) => {
       })
   }
 }
-
-
 // delelte login banner
 exports.deletLoginDashboardBanner = async (req, res, next) => {
   try {
@@ -396,7 +430,7 @@ exports.deletLoginDashboardBanner = async (req, res, next) => {
         .json({
           success: false,
           message: "image credentials missing"
-        })
+        });
     }
     const image = await cloudinary.uploader.destroy(public_id);
     if (image.result === "ok") {

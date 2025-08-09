@@ -2,25 +2,22 @@ const mongoose = require('mongoose');
 
 const emiSchema = new mongoose.Schema({
   phone: {
-    type: Number,
+    type: String,
     ref: 'user',
     required: true
   },
   totalEmis: {
-    type: Number,
+    type: String,
     required: true
   },
   emiAmount: {
-    type: Number,
+    type: String,
     required: true
   },
-  emis: [
-    {
-      dueDate: { type: Date, required: true },
-      isPaid: { type: Boolean, default: false },
-      paidDate: { type: Date }
-    }
-  ]
+  paidEmi:{
+    type:Number,
+    default:0
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('EMI', emiSchema);

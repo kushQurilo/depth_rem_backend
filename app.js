@@ -19,6 +19,7 @@ const InvoiceRouter = require('./src/routes/invoiceRoute');
 const TncRoutetr = require('./src/routes/TncRouter');
 const privacyPolicyRouter = require('./src/routes/privacyPolicyRoute');
 const QRUPIRouter = require('./src/routes/UpiAndQrRoute');
+const emiRouters = require('./src/routes/testingRoute');
 const app = express();
 app.use(cors());
 app.use(express.urlencoded({extended:true}));
@@ -40,4 +41,5 @@ app.use(`${baseURI}invoice`,InvoiceRouter);
 app.use(`${baseURI}tnc`,TncRoutetr);
 app.use(`${baseURI}privacy`,privacyPolicyRouter);
 app.use(`${baseURI}upi`,QRUPIRouter);
+app.use(`${baseURI}emiSettle`,emiRouters)
 module.exports = app;

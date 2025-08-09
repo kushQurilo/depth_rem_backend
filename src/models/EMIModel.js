@@ -7,7 +7,8 @@ const EmiSchema = mongoose.Schema({
     },
     phone: {
         type: String,
-        default: ''
+        default: '',
+        res:'DriUser'
     },
     credit_Cards: {
         type: [String],

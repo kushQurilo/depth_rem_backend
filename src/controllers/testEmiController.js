@@ -2,46 +2,38 @@
 const fs = require("fs");
 const cron = require('node-cron');
 const csv = require("csv-parser");
-const EMI = require("../models/EMI");
 const User = require("../models/userModel");
 const EMI = require('../models/testingModel');
+const DrisModel = require("../models/DriUserModel");
 exports.uploadEMICSV = async (req, res) => {
-    const results = [];
+  const results = [];
 
-    fs.createReadStream(req.file.path)
-        .pipe(csv())
-        .on("data", (data) => results.push(data))
-        .on("end", async () => {
-            for (let row of results) {
-                const { phoneNumber, emiAmount, dueDate, totalEmi } = row;
+  fs.createReadStream(req.file.path)
+    .pipe(csv())
+    .on("data", (data) => results.push(data))
+    .on("end", async () => {
+      for (let row of results) {
+        const { phoneNumber, emiTotal, dueDate, totalEmi } = row;
+        console.log({phoneNumber , emiTotal ,dueDate,totalEmi})
+        const user = await DrisModel.findOne({ phone: phoneNumber.trim() });
+        if (!user) {
+          console.log(`User with phone ${phoneNumber} not found.`);
+          continue;
+        }
 
-                const user = await User.findOne({phone: phoneNumber.trim() });
-                if (!user) {
-                    console.log(`User with phone ${phoneNumber} not found.`);
-                    continue;
-                }
-
-                const emis = [];
-                const start = new Date(dueDate);
-
-                for (let i = 0; i < parseInt(totalEmi); i++) {
-                    const nextDue = new Date(start);
-                    nextDue.setMonth(nextDue.getMonth() + i);
-                    emis.push({ dueDate: nextDue });
-                }
-
-                await EMI.create({
-                    phone:user?.phone,
-                    totalEmis: parseInt(totalEmi),
-                    emiAmount: parseFloat(emiAmount),
-                    emis
-                });
-            }
-
-            fs.unlinkSync(req.file.path);
-            res.json({ message: "EMI plans created successfully from CSV" });
+        await EMI.create({
+          phone: user.phone,
+          totalEmis: totalEmi,
+          emiAmount:emiTotal,
+          dueDate: dueDate
         });
+      }
+
+      fs.unlinkSync(req.file.path);
+      res.json({ message: "EMI records created successfully from CSV" });
+    });
 };
+
 exports.payEmi = async (req, res) => {
   const { userId } = req.params;
   const plan = await EMI.findOne({ user: userId });

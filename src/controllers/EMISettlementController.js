@@ -82,7 +82,7 @@ exports.EMISettlement = async (req, res) => {
             }
         });
         fs.unlinkSync(req.file.path); // delete temp CSV
-
+        
         const setEmi = await EmiModel.create(output);
         if (!setEmi) {
             return res.status(400).send({ message: "Error in add EMI" });
