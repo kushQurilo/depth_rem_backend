@@ -43,6 +43,7 @@ const kycSchema = new mongoose.Schema({
         type:String,
         required:[true,'email missing'],
         unique:true,
+        
     },
     gender:{
         type:String,

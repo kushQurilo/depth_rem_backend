@@ -1,5 +1,7 @@
 const csv = require('csvtojson');
-const DrisModel = require('../models/DriUserModel')
+const DrisModel = require('../models/DriUserModel');
+const KYCmodel = require('../models/KYCModel');
+const EmiModel = require('../models/EMIModel');
 exports.importUsersFromCSV = async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'File required' });
@@ -27,8 +29,24 @@ exports.importUsersFromCSV = async (req, res) => {
 //get all user list for admin
 exports.getUsersList = async (req, res) => {
     try {
-        const users = await DrisModel.find().select('-createdAt -__v')
-        return res.status(200).json({ success: true, data: users });
+        const users = await DrisModel.find({})
+            .select('-createdAt -__v') // remove unwanted fields
+            .lean(); // return plain JS objects (easier to modify)
+      console.log('user',users)
+        // For each user, attach related KYC and EMI
+        const results = await Promise.all(users.map(async (user) => {
+            const kycData = await KYCmodel.findOne({ user_id: user._id }).select('-__v').lean();
+            const emiData = await EmiModel.find({ phone: user.phone }).select('-__v').lean();
+
+            return {
+                ...user,
+                kyc: kycData || null,
+                emi: emiData || []
+            };
+        }));
+
+        return res.status(200).json({ success: true, data: results });
+
     } catch (err) {
         console.error('Error fetching users:', err);
         return res.status(500).json({

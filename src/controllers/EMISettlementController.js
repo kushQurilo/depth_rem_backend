@@ -82,7 +82,7 @@ exports.EMISettlement = async (req, res) => {
             }
         });
         fs.unlinkSync(req.file.path); // delete temp CSV
-        
+
         const setEmi = await EmiModel.create(output);
         if (!setEmi) {
             return res.status(400).send({ message: "Error in add EMI" });
@@ -135,4 +135,18 @@ exports.deleteEmis = async (req, res, next) => {
         return res.status(500).json({ message: "Something went wrong.", error: err.message });
     }
 
+}
+
+exports.getAllEmiByUser = async (req, res, next) => {
+    try {
+        const emidata = await EmiModel.find({}).populate('phone')
+        return res.status(200).json({ success: true, data: emidata })
+    } catch (error) {
+        return res.status(500)
+            .json({
+                success: false,
+                message: error.message,
+                error
+            })
+    }
 }

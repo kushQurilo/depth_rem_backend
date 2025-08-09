@@ -90,7 +90,7 @@ exports.loginAdmin = async (req, res, next) => {
 
 exports.uploadProfileImage = async (req, res) => {
   try {
-    const {admin_id} = req;
+    const { admin_id } = req;
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
@@ -98,9 +98,10 @@ exports.uploadProfileImage = async (req, res) => {
       folder: "driadmiprofile"
     });
     fs.unlinkSync(req.file.path);
-    const user = await adminModel.findByIdAndUpdate(admin_id,{
-        image: uploadResult.secure_url, 
-        public_id: uploadResult.public_id,  },
+    const user = await adminModel.findByIdAndUpdate(admin_id, {
+      image: uploadResult.secure_url,
+      public_id: uploadResult.public_id,
+    },
       { new: true }
     );
     res.status(200).json({
@@ -231,6 +232,50 @@ exports.updateAdminDetails = async (req, res) => {
 };
 
 
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { admin_id } = req;
+    if (!admin_id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+    const admin = await adminModel.findById(admin_id);
+    if (admin) {
+      if (admin.email === email) {
+        return res.status(400).json({
+          success: false,
+          message: "Email Invaid",
+        })
+      }
+      await admin.updateOne({ password: password })
+      admin.save()
+      return res.json(201)
+        .json({
+          success: true,
+          message: "Password changed"
+        })
+    }
+    return res.status(404).json({
+      success: false,
+      message: "Admin not found",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      error: error,
+    })
+  }
+}
 
 
 exports.getAdminDetails = async (req, res) => {
